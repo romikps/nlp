@@ -42,7 +42,23 @@ class BigramTrainer(object):
 
         :param token: The current word to be processed.
         """
+
         # YOUR CODE HERE
+
+        self.total_words += 1
+
+        try:
+            index = self.index.get(token)
+        except KeyError:
+            index = len(list(self.index.keys())) + 1
+            self.index[token] = index
+            self.word[index] = token
+            self.unique_words += 1
+
+        self.unigram_count[index] += 1
+        " ".join(self.tokens).count(token)
+        #COUNT ALL THE PAIRS WITH TOKEN
+
 
 
     def stats(self):
