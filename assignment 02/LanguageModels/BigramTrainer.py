@@ -31,11 +31,18 @@ class BigramTrainer(object):
         except LookupError :
             nltk.download('punkt')
             self.tokens = nltk.word_tokenize(text)
+
+
+        #ORIGINAL TEMPLATE CODE, CHECK IF IT IS DOABLE WITH THIS VERSION
+        #for token in self.tokens:
+         #   self.process_token(token)
+
+        current_token_position = 0
         for token in self.tokens:
-            self.process_token(token)
+            self.process_token(token, current_token_position)
+            current_token_position += 1
 
-
-    def process_token(self, token):
+    def process_token(self, token, current_token_position):
         """
         Processes one word in the training corpus, and adjusts the unigram and
         bigram counts.
@@ -44,29 +51,41 @@ class BigramTrainer(object):
         """
 
         # YOUR CODE HERE
-
         self.total_words += 1
-
         try:
-            index = self.index.get(token)
+            current_token_index = self.index[token]
         except KeyError:
-            index = len(list(self.index.keys())) + 1
-            self.index[token] = index
-            self.word[index] = token
+            current_token_index = len(self.index)
+            self.index[token] = current_token_index
+            self.word[current_token_index] = token
             self.unique_words += 1
 
-        self.unigram_count[index] += 1
-        " ".join(self.tokens).count(token)
-        #COUNT ALL THE PAIRS WITH TOKEN
+        self.unigram_count[current_token_index] += 1
 
-
+        if current_token_position > 0:
+            preceding_token_index = self.index[self.tokens[current_token_position - 1]]
+            self.bigram_count[preceding_token_index][self.index[token]] += 1
 
     def stats(self):
         """
         Creates a list of rows to print of the language model.
 
         """
-        rows_to_print = []
+        rows_to_print = [str(self.unique_words) + " " + str(self.total_words)]
+
+        for key in self.word:
+            token = self.word[key]
+            token_count = self.unigram_count[key]
+            rows_to_print.append(str(key) + " " + token + " " + str(token_count))
+
+        for first_key in self.bigram_count:
+            for second_key in self.bigram_count[first_key]:
+                bigram_probability = '{0:.15f}'.format(math.log(self.bigram_count[first_key][second_key]/self.unigram_count[first_key]))
+                rows_to_print.append(str(first_key) + " " + str(second_key) + " " +
+                                     str(bigram_probability))
+
+
+        rows_to_print.append(str(-1))
 
         # YOUR CODE HERE
 
@@ -124,7 +143,7 @@ def main():
     bigram_trainer.process_files(arguments.file)
 
     if arguments.check:
-        results  = bigram_trainer.stats()
+        results = bigram_trainer.stats()
         payload = json.dumps({
             'tokens': bigram_trainer.tokens,
             'result': results
