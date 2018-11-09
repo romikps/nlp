@@ -11,7 +11,7 @@ import requests
 This file is part of the computer assignments for the course DD1418/DD2418 Language engineering at KTH.
 Created 2017 by Johan Boye and Patrik Jonell.
 """
-
+        
 class BigramTester(object):
     def __init__(self):
         """
@@ -54,8 +54,7 @@ class BigramTester(object):
 
         # The number of words processed in the test corpus.
         self.test_words_processed = 0
-
-
+    
     def read_model(self, filename):
         """
         Reads the contents of the language model file into the appropriate data structures.
@@ -63,11 +62,25 @@ class BigramTester(object):
         :param filename: The name of the language model file.
         :return: <code>true</code> if the entire file could be processed, false otherwise.
         """
-
         try:
             with codecs.open(filename, 'r', 'utf-8') as f:
                 self.unique_words, self.total_words = map(int, f.readline().strip().split(' '))
                 # YOUR CODE HERE
+                line = f.readline().strip()
+                while line != '-1':
+                    tokens = line.split(' ')
+                    if is_int(tokens[1]):
+                        first_key, second_key, prob = tokens
+                        self.bigram_prob[first_key][second_key] = prob
+                    else:
+                        key, word, count = tokens
+                        self.word[key] = word
+                        self.index[word] = key
+                        self.unigram_count[key] = count
+                    print(line)
+                    line = f.readline().strip()
+                print(self.unigram_count)
+                print(self.bigram_prob)
                 return True
         except IOError:
             print("Couldn't find bigram probabilities file {}".format(filename))
@@ -135,5 +148,12 @@ def main():
     else:
         print('Read {0:d} words. Estimated entropy: {1:.2f}'.format(bigram_tester.test_words_processed, bigram_tester.logProb))
 
+def is_int(string):
+        try:
+            int(string)
+            return True
+        except ValueError:
+            return False
+        
 if __name__ == "__main__":
     main()
