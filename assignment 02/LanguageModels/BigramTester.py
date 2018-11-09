@@ -54,6 +54,9 @@ class BigramTester(object):
 
         # The number of words processed in the test corpus.
         self.test_words_processed = 0
+        
+        # Stores the previously processed token.
+        self.previous_token = ''
     
     def read_model(self, filename):
         """
@@ -70,17 +73,17 @@ class BigramTester(object):
                 while line != '-1':
                     tokens = line.split(' ')
                     if is_int(tokens[1]):
-                        first_key, second_key, prob = tokens
+                        first_key, second_key, prob = int(tokens[0]), int(tokens[1]), float(tokens[2])
                         self.bigram_prob[first_key][second_key] = prob
                     else:
-                        key, word, count = tokens
+                        key, word, count = int(tokens[0]), tokens[1], int(tokens[2])
                         self.word[key] = word
                         self.index[word] = key
                         self.unigram_count[key] = count
-                    print(line)
+                    #print(line)
                     line = f.readline().strip()
-                print(self.unigram_count)
-                print(self.bigram_prob)
+                #print(self.unigram_count)
+                #print(self.bigram_prob)
                 return True
         except IOError:
             print("Couldn't find bigram probabilities file {}".format(filename))
@@ -89,7 +92,23 @@ class BigramTester(object):
 
     def compute_entropy_cumulatively(self, word):
         # YOUR CODE HERE
-        pass
+        prob = self.lambda3
+        try:
+            current_token_index = self.index[word]
+            prob += self.lambda2 * self.unigram_count[current_token_index] / self.total_words
+            
+            try:
+                previous_token_index = self.index[self.previous_token]
+                prob += self.lambda1 * math.exp(self.bigram_prob[previous_token_index][current_token_index])
+            except KeyError:
+                pass
+                
+        except KeyError:
+            pass
+                            
+        self.logProb += math.log(prob)
+        self.test_words_processed += 1
+        self.previous_token = word
 
     def process_test_file(self, test_filename):
         """
@@ -103,6 +122,7 @@ class BigramTester(object):
                 self.tokens = nltk.word_tokenize(f.read().lower()) # Important that it is named self.tokens for the --check flag to work
                 for token in self.tokens:
                     self.compute_entropy_cumulatively(token)
+                self.logProb *= (- 1.0 / self.test_words_processed)
             return True
         except IOError:
             print('Error reading testfile')
