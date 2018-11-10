@@ -3,6 +3,7 @@ import argparse
 import codecs
 from collections import defaultdict
 import random
+import numpy as np
 
 """
 This file is part of the computer assignments for the course DD1418/DD2418 Language engineering at KTH.
@@ -90,8 +91,23 @@ class Generator(object) :
         of the language model.
         """ 
         # YOUR CODE HERE
-        pass
-
+        next_word = w
+        for i in range(n):
+            print(next_word, end=' ')
+            
+            try:
+                preceding_word_id = self.index[next_word]
+            except KeyError:
+                preceding_word_id = np.random.choice(list(self.index.values()))
+            
+            try:
+                following_word_ids = list(self.bigram_prob[preceding_word_id].keys())
+                following_word_prob = list(map(math.exp, self.bigram_prob[preceding_word_id].values()))
+                next_word_id = np.random.choice(following_word_ids, p=following_word_prob)
+            except ValueError:
+                next_word_id = np.random.choice(list(self.index.values()))
+                
+            next_word = self.word[next_word_id]
 
 def main():
     """
