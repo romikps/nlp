@@ -65,6 +65,20 @@ class Generator(object) :
             with codecs.open(filename, 'r', 'utf-8') as f:
                 self.unique_words, self.total_words = map(int, f.readline().strip().split(' '))
                 # REUSE YOUR CODE FROM BigramTester.py here
+                line = f.readline().strip()
+                while line != '-1':
+                    tokens = line.split(' ')
+                    if is_int(tokens[1]):
+                        first_key, second_key, prob = int(tokens[0]), int(tokens[1]), float(tokens[2])
+                        self.bigram_prob[first_key][second_key] = prob
+                    else:
+                        key, word, count = int(tokens[0]), tokens[1], int(tokens[2])
+                        self.word[key] = word
+                        self.index[word] = key
+                        self.unigram_count[key] = count
+                    #print(line)
+                    line = f.readline().strip()
+                
                 return True
         except IOError:
             print("Couldn't find bigram probabilities file {}".format(filename))
@@ -93,6 +107,13 @@ def main():
     generator = Generator()
     generator.read_model(arguments.file)
     generator.generate(arguments.start,arguments.number_of_words)
+    
+def is_int(string):
+        try:
+            int(string)
+            return True
+        except ValueError:
+            return False
 
 if __name__ == "__main__":
     main()
