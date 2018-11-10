@@ -1,0 +1,11 @@
+python BigramTester.py -f guardian_model.txt -t data/guardian_test.txt
+Read 871837 words. Estimated entropy: 6.70
+
+python BigramTester.py -f guardian_model.txt -t data/austen_test.txt
+Read 13161 words. Estimated entropy: 6.40
+
+python BigramTester.py -f austen_model.txt -t data/austen_test.txt
+Read 13161 words. Estimated entropy: 5.72
+
+python BigramTester.py -f austen_model.txt -t data/guardian_test.txt
+Read 871837 words. Estimated entropy: 9.75
