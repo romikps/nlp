@@ -51,8 +51,6 @@ class ViterbiBigramDecoder(object):
 
     # ------------------------------------------------------
 
-
-
     def viterbi(self, s):
         """
         Performs the Viterbi decoding and returns the most likely
@@ -64,23 +62,42 @@ class ViterbiBigramDecoder(object):
 
         # The Viterbi matrices
         self.v = np.zeros((len(s), Key.NUMBER_OF_CHARS))
-        self.v[:,:] = -float("inf")
+        self.v[:, :] = -float("inf")
         self.backptr = np.zeros((len(s) + 1, Key.NUMBER_OF_CHARS), dtype='int')
 
         # Initialization
-        self.backptr[0,:] = Key.START_END
-        self.v[0,:] = self.a[Key.START_END,:] + self.b[index[0],:]
-
+        self.backptr[0, :] = Key.START_END
+        self.v[0, :] = self.a[Key.START_END, :] + self.b[index[0], :]
 
         # Induction step
 
         # YOUR CODE HERE
 
+        for time_step in range(1, len(index)):
+            for state in range(Key.NUMBER_OF_CHARS):
+
+                support_array = np.zeros((1, Key.NUMBER_OF_CHARS))
+                for support_state in range(Key.NUMBER_OF_CHARS):
+                    support_array[0, support_state] = self.v[time_step-1, support_state] + self.b[index[time_step], state] + self.a[support_state][state]
+
+                self.v[time_step, state] = np.max(support_array)
+                self.backptr[time_step, state] = np.argmax(support_array)
+
+        best_path_pointer = np.argmax(self.v[len(index)-1, :])
+
+        string = ""
+        time_step_reverse = len(index)-1
+        while time_step_reverse >= 0:
+            character_to_append = Key.index_to_char(best_path_pointer)
+            string = character_to_append + string
+            time_step_reverse -= 1
+            best_path_pointer = self.backptr[time_step_reverse, best_path_pointer]
+
         # Finally return the result
 
         # REPLACE THE LINE BELOW WITH YOUR CODE
 
-        return ''
+        return string
 
 
     # ------------------------------------------------------

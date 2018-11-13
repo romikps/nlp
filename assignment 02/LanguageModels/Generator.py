@@ -122,7 +122,7 @@ def main():
 
     generator = Generator()
     generator.read_model(arguments.file)
-    generator.generate(arguments.start,arguments.number_of_words)
+    generator.generate(arguments.start, arguments.number_of_words)
     
 def is_int(string):
         try:
