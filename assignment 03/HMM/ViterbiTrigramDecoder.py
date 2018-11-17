@@ -70,16 +70,49 @@ class ViterbiTrigramDecoder(object):
         # Initialization
 
         # YOUR CODE HERE
+        # a[i][j][k] = probability qi -> qj -> qk (a 27x27x27)
+        # b[i][k] = probability qk emitting oi (b 27x27)
+        # (v tx27x27)
+        # (b tx27x27)
+        self.v[0, Key.START_END, :] = self.a[Key.START_END, Key.START_END, :] + self.b[:, index[0]]
+        self.backptr[0, Key.START_END, :] = Key.START_END
 
         # Induction step
 
         # YOUR CODE HERE
+        for time_step in range(1, len(index)):
+            for state in range(Key.NUMBER_OF_CHARS):
+                for prev_state in range(Key.NUMBER_OF_CHARS):
+                    support_array = np.zeros(Key.NUMBER_OF_CHARS)
+                    for support_state in range(Key.NUMBER_OF_CHARS):
+                        support_array[support_state] = self.v[time_step-1, support_state, prev_state] + \
+                            self.a[support_state][prev_state][state] + \
+                            self.b[index[time_step], state]
 
+                    self.v[time_step, prev_state, state] = np.max(support_array)
+                    self.backptr[time_step, prev_state, state] = np.argmax(support_array)
+
+        best_path_pointer = np.argmax(self.v[len(index)-1, :, :])
+        autocorrected = ""
+#        print('Array V:\n', self.v)
+#        print('\n\n\nArray backptr:\n', self.backptr)
+#        print('\n\n\nbest_path_pointer:\n', best_path_pointer)
+        
+        prev_char_index = int(best_path_pointer / Key.NUMBER_OF_CHARS)
+        current_char_index = best_path_pointer % Key.NUMBER_OF_CHARS
+        
+        for time_step in range(len(index)-1, -1, -1):
+            autocorrected = Key.index_to_char(current_char_index) + autocorrected
+#            print(f't = {time_step}: {best_path_pointer}')
+            best_path_pointer = self.backptr[time_step, prev_char_index,
+                                             current_char_index]
+            current_char_index = prev_char_index
+            prev_char_index = best_path_pointer
         # Finally return the result
 
         # REPLACE THE LINE BELOW WITH YOUR CODE
 
-        return ''
+        return autocorrected
 
 
 
