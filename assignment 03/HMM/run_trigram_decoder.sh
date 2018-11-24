@@ -1,3 +1,3 @@
 #!/bin/sh
-python ViterbiTrigramDecoder.py --probs trigram_probs.txt --file mistyped_test --check
+python ViterbiTrigramDecoder.py --probs trigram_probs.txt --file mistyped_test.txt --check
 
