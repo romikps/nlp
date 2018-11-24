@@ -19,8 +19,9 @@ class BinaryLogisticRegression(object):
 
     LEARNING_RATE = 0.01  # The learning rate.
     CONVERGENCE_MARGIN = 0.001  # The convergence criterion.
-    MAX_ITERATIONS = 100 # Maximal number of passes through the datapoints in stochastic gradient descent.
+    MAX_ITERATIONS = 10 # Maximal number of passes through the datapoints in stochastic gradient descent.
     MINIBATCH_SIZE = 1000 # Minibatch size (only for minibatch gradient descent)
+    PLOT = False
 
     # ----------------------------------------------------------------------
 
@@ -71,14 +72,15 @@ class BinaryLogisticRegression(object):
         return 1.0 / ( 1 + math.exp(-z) )
 
 
-    def conditional_prob(self, label, datapoint):
+    def conditional_prob(self, label, datapoint_index):
         """
         Computes the conditional probability P(label|datapoint)
         """
 
         # REPLACE THE COMMAND BELOW WITH YOUR CODE
+        prob_pos = self.sigmoid(np.dot(self.theta, self.x[datapoint_index]))
 
-        return 0
+        return prob_pos if label == 1 else (1 - prob_pos)
 
 
     def compute_gradient_for_all(self):
@@ -88,7 +90,11 @@ class BinaryLogisticRegression(object):
         """
 
         # YOUR CODE HERE
-
+        for k in range(self.FEATURES):
+            for i in range(self.DATAPOINTS):
+                sum_of_derivatives = self.x[i][k] * (self.conditional_prob(1, i) - self.y[i])
+            self.gradient[k] = sum_of_derivatives / self.DATAPOINTS
+                
 
     def compute_gradient_minibatch(self, minibatch):
         """
@@ -97,6 +103,11 @@ class BinaryLogisticRegression(object):
         """
         
         # YOUR CODE HERE
+        for k in range(self.FEATURES):
+            for i in minibatch:
+                sum_of_derivatives = self.x[i][k] * (self.conditional_prob(1, i) - self.y[i])
+            self.gradient[k] = sum_of_derivatives / self.MINIBATCH_SIZE
+        
 
 
     def compute_gradient(self, datapoint):
@@ -105,34 +116,80 @@ class BinaryLogisticRegression(object):
         (used for stochastic gradient descent).
         """
 
-        # YOUR CODE HERE
+        # YOUR CODE 
+        for k in range(self.FEATURES):
+            self.gradient[k] = self.x[datapoint][k] * (self.conditional_prob(1, datapoint) - self.y[datapoint])
 
 
     def stochastic_fit(self):
         """
         Performs Stochastic Gradient Descent.
         """
-        self.init_plot(self.FEATURES)
+        if self.PLOT:
+            self.init_plot(self.FEATURES)
 
         # YOUR CODE HERE
+        current_iteration = 0
+        while True:
+            current_iteration += 1
+            datapoint = np.random.randint(0, self.DATAPOINTS)
+            self.compute_gradient(datapoint)
+            if self.PLOT:
+                self.update_plot(np.sum(np.square(self.gradient)))
+            self.theta -= self.LEARNING_RATE * self.gradient
+            
+            print('gradient:', self.gradient)
+            print('sum of squares of gradient:', np.sum(np.square(self.gradient)))
+            
+            if current_iteration > self.MAX_ITERATIONS * self.DATAPOINTS \
+                or np.sum(np.square(self.gradient)) < self.CONVERGENCE_MARGIN:
+                    break
+                
+        
 
 
     def minibatch_fit(self):
         """
         Performs Mini-batch Gradient Descent.
         """
-        self.init_plot(self.FEATURES)
+        if self.PLOT:
+            self.init_plot(self.FEATURES)
 
         # YOUR CODE HERE
+        while True:
+            minibatch = np.random.randint(0, self.DATAPOINTS, self.MINIBATCH_SIZE)
+            self.compute_gradient_minibatch(minibatch)
+            if self.PLOT:
+                self.update_plot(np.sum(np.square(self.gradient)))
+            self.theta -= self.LEARNING_RATE * self.gradient
+                
+            print('gradient:', self.gradient)
+            print('sum of squares of gradient:', np.sum(np.square(self.gradient)))
+                
+            if np.sum(np.square(self.gradient)) < self.CONVERGENCE_MARGIN:
+                break
 
 
     def fit(self):
         """
         Performs Batch Gradient Descent
         """
-        self.init_plot(self.FEATURES)
+        if self.PLOT:
+            self.init_plot(self.FEATURES)
 
         # YOUR CODE HERE
+        while True:
+            self.compute_gradient_for_all()
+            if self.PLOT:
+                self.update_plot(np.sum(np.square(self.gradient)))
+            self.theta -= self.LEARNING_RATE * self.gradient
+            
+            print('gradient:', self.gradient)
+            print('sum of squares of gradient:', np.sum(np.square(self.gradient)))
+            
+            if np.sum(np.square(self.gradient)) < self.CONVERGENCE_MARGIN:
+                break
+
 
 
     def classify_datapoints(self, test_data, test_labels):
@@ -154,6 +211,13 @@ class BinaryLogisticRegression(object):
             predicted = 1 if prob > .5 else 0
             confusion[predicted][self.y[d]] += 1
 
+        accuracy = (confusion[0][0] + confusion[1][1]) / self.DATAPOINTS # correctly classified / all
+        precision = confusion[1][1] / (confusion[1][1] + confusion[1][0]) # TP / (TP + FP)
+        recall = confusion[1][1] / (confusion[1][1] + confusion[0][1]) # TP / (TP + FN)
+        print('Accuracy: {:.2f}'.format(accuracy))
+        print('Precision: {:.2f}'.format(precision))
+        print('Recall: {:.2f}'.format(recall))
+
         print('                       Real class')
         print('                 ', end='')
         print(' '.join('{:>8d}'.format(i) for i in range(2)))
@@ -162,7 +226,7 @@ class BinaryLogisticRegression(object):
                 print('Predicted class: {:2d} '.format(i), end='')
             else:
                 print('                 {:2d} '.format(i), end='')
-            print(' '.join('{:>8.3f}'.format(confusion[i][j]) for j in range(2)))
+            print(' '.join('{:>8.0f}'.format(confusion[i][j]) for j in range(2)))
 
 
     def print_result(self):
