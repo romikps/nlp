@@ -19,7 +19,7 @@ class BinaryLogisticRegression(object):
 
     LEARNING_RATE = 0.01  # The learning rate.
     CONVERGENCE_MARGIN = 0.001  # The convergence criterion.
-    MAX_ITERATIONS = 10 # Maximal number of passes through the datapoints in stochastic gradient descent.
+    MAX_ITERATIONS = 100 # Maximal number of passes through the datapoints in stochastic gradient descent.
     MINIBATCH_SIZE = 1000 # Minibatch size (only for minibatch gradient descent)
     PLOT = False
 
@@ -91,8 +91,9 @@ class BinaryLogisticRegression(object):
 
         # YOUR CODE HERE
         for k in range(self.FEATURES):
+            sum_of_derivatives = 0
             for i in range(self.DATAPOINTS):
-                sum_of_derivatives = self.x[i][k] * (self.conditional_prob(1, i) - self.y[i])
+                sum_of_derivatives += self.x[i][k] * (self.conditional_prob(1, i) - self.y[i])
             self.gradient[k] = sum_of_derivatives / self.DATAPOINTS
                 
 
@@ -104,8 +105,9 @@ class BinaryLogisticRegression(object):
         
         # YOUR CODE HERE
         for k in range(self.FEATURES):
+            sum_of_derivatives = 0
             for i in minibatch:
-                sum_of_derivatives = self.x[i][k] * (self.conditional_prob(1, i) - self.y[i])
+                sum_of_derivatives += self.x[i][k] * (self.conditional_prob(1, i) - self.y[i])
             self.gradient[k] = sum_of_derivatives / self.MINIBATCH_SIZE
         
 
