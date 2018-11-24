@@ -17,7 +17,7 @@ class BinaryLogisticRegression(object):
 
     #  ------------- Hyperparameters ------------------ #
 
-    LEARNING_RATE = 0.01  # The learning rate.
+    LEARNING_RATE = 1  # The learning rate.
     CONVERGENCE_MARGIN = 0.001  # The convergence criterion.
     MAX_ITERATIONS = 100 # Maximal number of passes through the datapoints in stochastic gradient descent.
     MINIBATCH_SIZE = 1000 # Minibatch size (only for minibatch gradient descent)
@@ -93,9 +93,9 @@ class BinaryLogisticRegression(object):
         for k in range(self.FEATURES):
             sum_of_derivatives = 0
             for i in range(self.DATAPOINTS):
-                sum_of_derivatives += self.x[i][k] * (self.conditional_prob(1, i) - self.y[i])
+                sum_of_derivatives += self.x[i][k] * (self.conditional_prob(1, i) - self.y[i])            
             self.gradient[k] = sum_of_derivatives / self.DATAPOINTS
-                
+                            
 
     def compute_gradient_minibatch(self, minibatch):
         """
@@ -140,7 +140,7 @@ class BinaryLogisticRegression(object):
                 self.update_plot(np.sum(np.square(self.gradient)))
             self.theta -= self.LEARNING_RATE * self.gradient
             
-            print('gradient:', self.gradient)
+            #print('gradient:', self.gradient)
             print('sum of squares of gradient:', np.sum(np.square(self.gradient)))
             
             if current_iteration > self.MAX_ITERATIONS * self.DATAPOINTS \
@@ -165,7 +165,7 @@ class BinaryLogisticRegression(object):
                 self.update_plot(np.sum(np.square(self.gradient)))
             self.theta -= self.LEARNING_RATE * self.gradient
                 
-            print('gradient:', self.gradient)
+            #print('gradient:', self.gradient)
             print('sum of squares of gradient:', np.sum(np.square(self.gradient)))
                 
             if np.sum(np.square(self.gradient)) < self.CONVERGENCE_MARGIN:
@@ -186,7 +186,7 @@ class BinaryLogisticRegression(object):
                 self.update_plot(np.sum(np.square(self.gradient)))
             self.theta -= self.LEARNING_RATE * self.gradient
             
-            print('gradient:', self.gradient)
+            #print('gradient:', self.gradient)
             print('sum of squares of gradient:', np.sum(np.square(self.gradient)))
             
             if np.sum(np.square(self.gradient)) < self.CONVERGENCE_MARGIN:
