@@ -55,6 +55,11 @@ class NER(object):
     def first_token_in_sentence(self):
            return self.last_token in [None, '.', '!', '?']
 
+
+    def number_of_character(self):
+        return len(self.current_token)
+
+
     class FeatureFunction(object):
         def __init__(self, func):
             self.func = func
@@ -130,6 +135,7 @@ class NER(object):
         self.features = [
             NER.FeatureFunction(self.capitalized_token),
             NER.FeatureFunction(self.first_token_in_sentence),
+            NER.FeatureFunction(self.number_of_character),
         ]
 
         if training_file:

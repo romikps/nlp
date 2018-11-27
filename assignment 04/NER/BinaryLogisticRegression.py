@@ -22,6 +22,8 @@ class BinaryLogisticRegression(object):
     MAX_ITERATIONS = 100 # Maximal number of passes through the datapoints in stochastic gradient descent.
     MINIBATCH_SIZE = 1000 # Minibatch size (only for minibatch gradient descent)
     PLOT = True
+    L2 = 0.1
+    L1 = 0.1
 
     # ----------------------------------------------------------------------
 
@@ -61,7 +63,6 @@ class BinaryLogisticRegression(object):
             self.gradient = np.zeros(self.FEATURES)
 
 
-
     # ----------------------------------------------------------------------
 
 
@@ -93,7 +94,7 @@ class BinaryLogisticRegression(object):
         for k in range(self.FEATURES):
             sum_of_derivatives = 0
             for i in range(self.DATAPOINTS):
-                sum_of_derivatives += self.x[i][k] * (self.conditional_prob(1, i) - self.y[i])            
+                sum_of_derivatives += self.x[i][k] * (self.conditional_prob(1, i) - self.y[i]) + self.L2 * self.x[i][k] + self.L1
             self.gradient[k] = sum_of_derivatives / self.DATAPOINTS
                             
 
@@ -107,7 +108,7 @@ class BinaryLogisticRegression(object):
         for k in range(self.FEATURES):
             sum_of_derivatives = 0
             for i in minibatch:
-                sum_of_derivatives += self.x[i][k] * (self.conditional_prob(1, i) - self.y[i])
+                sum_of_derivatives += self.x[i][k] * (self.conditional_prob(1, i) - self.y[i]) + self.L2 * self.x[i][k] + self.L1
             self.gradient[k] = sum_of_derivatives / self.MINIBATCH_SIZE
         
 
@@ -120,7 +121,7 @@ class BinaryLogisticRegression(object):
 
         # YOUR CODE 
         for k in range(self.FEATURES):
-            self.gradient[k] = self.x[datapoint][k] * (self.conditional_prob(1, datapoint) - self.y[datapoint])
+            self.gradient[k] = self.x[datapoint][k] * (self.conditional_prob(1, datapoint) - self.y[datapoint])  + self.L2 * self.x[i][k] + self.L1
 
 
     def stochastic_fit(self):
