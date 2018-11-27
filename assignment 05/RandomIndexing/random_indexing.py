@@ -7,6 +7,9 @@ from halo import Halo
 from sklearn.neighbors import NearestNeighbors
 
 from string import punctuation, digits
+import glob
+import random
+import itertools
 
 
 class RandomIndexing(object):
@@ -18,9 +21,10 @@ class RandomIndexing(object):
         self.__non_zero_values = non_zero_values
         self.__lws = left_window_size
         self.__rws = right_window_size
-        self.__cv = None
-        self.__rv = None
+        self.__cv = dict()
+        self.__rv = dict()
         self.__nbrs = None
+        self.__all_cleaned_text = []
         
 
     def clean_line(self, line):
@@ -40,8 +44,15 @@ class RandomIndexing(object):
         Build vocabulary of words from the provided text files
         """
         # YOUR CODE HERE
-        self.write_vocabulary()
+        text_files = glob.glob("data/Harry Potter*")
+        for file in text_files:
+            with open(file, encoding='utf-8-sig') as f:
+                for line in f.readlines():
+                    words = self.clean_line(line)
+                    self.__vocab.update(words) 
 
+        self.write_vocabulary()
+        print(self.__all_cleaned_text)
 
     @property
     def vocabulary_size(self):
@@ -53,8 +64,54 @@ class RandomIndexing(object):
         Create word embeddings using Random Indexing
         """
         # YOUR CODE HERE
-        pass
 
+        cv_vectors = []
+        rv_vectors = []
+        self.__rv = dict()
+        self.__cv = dict()
+
+        for word in self.__vocab:
+            cv_vec = np.zeros((1, self.__dim))
+            rv_vec = np.zeros((1, self.__dim))
+            support_rv_vec = np.reshape(np.random.choice(self.__non_zero_values, self.__dim), (1, self.__dim))
+            rv_mask = np.reshape([i<100 for i in range(self.__dim)], (1, self.__dim))
+            random.shuffle(rv_mask)
+            rv_vec[rv_mask] = support_rv_vec[rv_mask]
+            self.__rv.setdefault(word, rv_vec)
+            self.__cv.setdefault(word, cv_vec)
+
+        #CHIAMARE QUA GET_WORD_VECTOR
+        text_files = glob.glob("data/Harry Potter*")
+        for file in text_files:
+            with open(file, encoding='utf-8-sig') as f:
+                for line in f.readlines():
+                    words = self.clean_line(line)
+                    self.__all_cleaned_text.append(words)
+
+        self.__all_cleaned_text = list(itertools.chain.from_iterable(self.__all_cleaned_text))
+
+        counter = 0
+        for word in self.__all_cleaned_text:
+            print(counter, len(self.__all_cleaned_text))
+            if counter < self.__lws:
+                lws = self.__lws - counter
+            else:
+                lws = self.__lws
+
+            if counter < len(self.__all_cleaned_text) - self.__rws:
+                rws = len(self.__all_cleaned_text) - counter
+            else:
+                rws = self.__rws
+
+            #for left_index in range(1, lws + 1):
+            self.__cv[word] += self.__cv[self.__all_cleaned_text[counter-1]] 
+
+            #for right_index in range(1, rws + 1):
+            self.__cv[word] += self.__cv[self.__all_cleaned_text[counter+1]]         
+
+            counter += 1
+
+        pass
 
     def find_nearest(self, words, k=5, metric='cosine'):
         """
@@ -69,6 +126,9 @@ class RandomIndexing(object):
         Returns a trained vector for the word
         """
         # YOUR CODE HERE
+
+
+
         return None
 
 
