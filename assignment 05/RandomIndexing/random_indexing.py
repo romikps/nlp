@@ -6,6 +6,8 @@ import numpy as np
 from halo import Halo
 from sklearn.neighbors import NearestNeighbors
 
+from string import punctuation, digits
+
 
 class RandomIndexing(object):
     def __init__(self, filenames, dimension=2000, non_zero=100, non_zero_values=[-1, 1], left_window_size=3, right_window_size=3):
@@ -22,9 +24,9 @@ class RandomIndexing(object):
         
 
     def clean_line(self, line):
+        
         # YOUR CODE HERE
-        return []
-
+        return ''.join([char for char in line if char not in punctuation + digits]).split()
 
     def text_gen(self):
         for fname in self.__sources:
