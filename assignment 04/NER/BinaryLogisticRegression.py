@@ -22,8 +22,8 @@ class BinaryLogisticRegression(object):
     MAX_ITERATIONS = 100 # Maximal number of passes through the datapoints in stochastic gradient descent.
     MINIBATCH_SIZE = 1000 # Minibatch size (only for minibatch gradient descent)
     PLOT = True
-    L2 = 0.1
-    L1 = 0.1
+    L2 = 0.0
+    L1 = 0.0
 
     # ----------------------------------------------------------------------
 
