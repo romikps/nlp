@@ -7,7 +7,6 @@ from halo import Halo
 from sklearn.neighbors import NearestNeighbors
 
 from string import punctuation, digits
-import glob
 import random
 import itertools
 
@@ -44,15 +43,10 @@ class RandomIndexing(object):
         Build vocabulary of words from the provided text files
         """
         # YOUR CODE HERE
-        text_files = glob.glob("data/Harry Potter*")
-        for file in text_files:
-            with open(file, encoding='utf-8-sig') as f:
-                for line in f.readlines():
-                    words = self.clean_line(line)
-                    self.__vocab.update(words) 
+        for words in self.text_gen():
+            self.__vocab.update(words) 
 
         self.write_vocabulary()
-        print(self.__all_cleaned_text)
 
     @property
     def vocabulary_size(self):
@@ -80,37 +74,29 @@ class RandomIndexing(object):
             self.__rv.setdefault(word, rv_vec)
             self.__cv.setdefault(word, cv_vec)
 
-        #CHIAMARE QUA GET_WORD_VECTOR
-        text_files = glob.glob("data/Harry Potter*")
-        for file in text_files:
-            with open(file, encoding='utf-8-sig') as f:
-                for line in f.readlines():
-                    words = self.clean_line(line)
-                    self.__all_cleaned_text.append(words)
+        line_counter = 0
+        for words in self.text_gen():
+            counter = 0
+            for word in words:
+                if counter < self.__lws:
+                    lws = counter
+                else:
+                    lws = self.__lws
 
-        self.__all_cleaned_text = list(itertools.chain.from_iterable(self.__all_cleaned_text))
+                if self.__rws >= len(words) - counter:
+                    rws = len(words) - counter - 1
+                else:
+                    rws = self.__rws
 
-        counter = 0
-        for word in self.__all_cleaned_text:
-            print(counter, len(self.__all_cleaned_text))
-            if counter < self.__lws:
-                lws = self.__lws - counter
-            else:
-                lws = self.__lws
+                for left_index in range(1, lws + 1):
+                    self.__cv[word] += self.__rv[words[counter-left_index]] 
 
-            if counter < len(self.__all_cleaned_text) - self.__rws:
-                rws = len(self.__all_cleaned_text) - counter
-            else:
-                rws = self.__rws
+                for right_index in range(1, rws + 1):
+                    self.__cv[word] += self.__rv[words[counter+right_index]]         
 
-            #for left_index in range(1, lws + 1):
-            self.__cv[word] += self.__cv[self.__all_cleaned_text[counter-1]] 
-
-            #for right_index in range(1, rws + 1):
-            self.__cv[word] += self.__cv[self.__all_cleaned_text[counter+1]]         
-
-            counter += 1
-
+                counter += 1
+            line_counter += 1
+        print(self.__cv[word].shape)
         pass
 
     def find_nearest(self, words, k=5, metric='cosine'):
@@ -118,7 +104,28 @@ class RandomIndexing(object):
         Function returning k nearest neighbors for each word in `words`
         """
         # YOUR CODE HERE
-        return [None]
+        self.__nbrs = NearestNeighbors(n_neighbors=k, metric=metric)
+        cv_values = np.array(list(self.__cv.values()))
+        cv_values = cv_values.reshape(cv_values.shape[0], cv_values.shape[2])
+
+        cv_keys = np.array(list(self.__cv.keys())).reshape(cv_values.shape[0], 1)
+
+        self.__nbrs.fit(cv_values)
+
+        total_neighbors = []
+
+        for word in words:
+            try:
+                neighbors = self.__nbrs.kneighbors(np.asarray(self.__cv[word]).reshape(1, self.__dim))
+                neighbors_perc = neighbors[0]
+                neighbors_words = neighbors[1]
+                for i in range(k):
+                    print((cv_keys[neighbors_words[0, i]][0], neighbors_perc[0, i]))
+                    total_neighbors.append((cv_keys[neighbors_words[0, i]][0], neighbors_perc[0, i]))
+            except KeyError:
+                total_neighbors.append(None)
+
+        return total_neighbors
 
 
     def get_word_vector(self, word):
@@ -126,10 +133,7 @@ class RandomIndexing(object):
         Returns a trained vector for the word
         """
         # YOUR CODE HERE
-
-
-
-        return None
+        return self.__cv[word]
 
 
     def vocab_exists(self):
