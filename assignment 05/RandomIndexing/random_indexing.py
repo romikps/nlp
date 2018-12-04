@@ -149,7 +149,7 @@ class RandomIndexing(object):
     def read_vocabulary(self):
         vocab_exists = self.vocab_exists()
         if vocab_exists:
-            with open('vocab.txt') as f:
+            with open('vocab.txt', encoding='utf-8') as f:
                 for line in f:
                     self.__vocab.add(line.strip())
         self.__i2w = list(self.__vocab)
@@ -157,7 +157,7 @@ class RandomIndexing(object):
 
 
     def write_vocabulary(self):
-        with open('vocab.txt', 'w') as f:
+        with open('vocab.txt', 'w', encoding='utf-8') as f:
             for w in self.__vocab:
                 f.write('{}\n'.format(w))
 
