@@ -67,6 +67,12 @@ class RandomIndexing(object):
         for word in self.__vocab:
             cv_vec = np.zeros((1, self.__dim))
             rv_vec = np.zeros((1, self.__dim))
+            
+            # Alternative
+#            non_zero_indeces = np.random.choice(np.arange(self.__dim), size=self.__non_zero, replace=False)
+#            non_zeroes_values = np.random.choice(self.__non_zero_values, size=self.__non_zero)
+#            rv_vec[non_zero_indeces] = non_zeroes_values
+            
             support_rv_vec = np.reshape(np.random.choice(self.__non_zero_values, self.__dim), (1, self.__dim))
             rv_mask = np.reshape([i<100 for i in range(self.__dim)], (1, self.__dim))
             random.shuffle(rv_mask)
@@ -143,7 +149,7 @@ class RandomIndexing(object):
     def read_vocabulary(self):
         vocab_exists = self.vocab_exists()
         if vocab_exists:
-            with open('vocab.txt') as f:
+            with open('vocab.txt', encoding='utf-8') as f:
                 for line in f:
                     self.__vocab.add(line.strip())
         self.__i2w = list(self.__vocab)
@@ -151,7 +157,7 @@ class RandomIndexing(object):
 
 
     def write_vocabulary(self):
-        with open('vocab.txt', 'w') as f:
+        with open('vocab.txt', 'w', encoding='utf-8') as f:
             for w in self.__vocab:
                 f.write('{}\n'.format(w))
 
