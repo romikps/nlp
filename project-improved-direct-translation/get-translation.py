@@ -55,8 +55,12 @@ def get_first_translation(word, last_word_translated, n_gram_dic):
 	
 
 def tokenize_line(line):
-		tknzr = TweetTokenizer()
-		return tknzr.tokenize(line)
+
+	#Specific of italian to replace ' with a letter
+	line = line.replace("'", "a ")
+	
+	tknzr = TweetTokenizer()
+	return tknzr.tokenize(line)	
 
 
 		#return ''.join([char for char in line if char not in punctuation + digits]).split()
