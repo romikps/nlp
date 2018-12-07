@@ -25,26 +25,38 @@ def preprocess_word(word):
 
 
 def translate(word):
-    word = "expensive"
-    italian = 'italian-english'
-    
+    # ASCII encode
     word_encoded = urllib.parse.quote(word)
     url = f"https://en.bab.la/lexikon/{italian}/{word_encoded}"
     contents = urllib.request.urlopen(url).read()
 
     soup = BeautifulSoup(contents, 'html.parser')
     all_translations = {}
-    for meaning in soup.body.find('div', class_='quick-results').find_all('div', class_='quick-result-entry'):
-        pos_html = meaning.find('div', class_='quick-result-option')
-        if pos_html != None:
-            pos = pos_html.find('span', class_="suffix").text.strip("{}")
-            translations = meaning.find('div', class_="quick-result-overview").find('ul')
+    # Only retrieve translations source language -> targe language, not <->
+    seen_quick_results_header = False
+    for quick_result in soup.body.find('div', class_='quick-results') \
+                            .find_all('div', class_=['quick-results-header', \
+                                                     'quick-result-entry']):
+        if quick_result['class'] == 'quick-results-header':
+            if not seen_quick_results_header:
+                # Skip first results header
+                seen_quick_results_header = True
+                continue
+            else:
+                # Don't extract translations after second results header
+                return all_translations
+            
+        quick_result_option = quick_result.find('div', class_='quick-result-option')
+        if quick_result_option != None:
+            # Extract the part of speech tag
+            pos = quick_result_option.find('span', class_="suffix").text.strip("{}")
+            translations = quick_result.find('div', class_="quick-result-overview").find('ul')
             if translations != None:
                 all_translations[pos] = [translation for translation in translations.stripped_strings]
-    
-    print(all_translations)
 
     return all_translations
+
+print(translate('casa'))
   
     
 def get_first_translation(word, last_word_translated, n_gram_dic):
