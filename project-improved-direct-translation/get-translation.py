@@ -1,9 +1,8 @@
 import urllib.request
+import urllib.parse
 from bs4 import BeautifulSoup
 from string import punctuation, digits
 import csv
-import urllib.parse
-from nltk.tokenize import TweetTokenizer
 import pattern
 from pos_tags import pos_tags
 
@@ -73,19 +72,19 @@ def lookup(word, source_language="italian", target_language="english"):
             else:
                 # Don't extract translations after second results header
                 return all_translations
+        else:    
+            quick_result_option = quick_result.find('div', class_='quick-result-option')
+            quick_result_overview = quick_result.find('div', class_="quick-result-overview")
             
-        quick_result_option = quick_result.find('div', class_='quick-result-option')
-        quick_result_overview = quick_result.find('div', class_="quick-result-overview")
-        
-        if quick_result_option != None and quick_result_overview != None:
-            quick_result_option_span = quick_result_option.find('span', class_="suffix")
-            quick_result_overview_ul = quick_result_overview.find('ul')
-            
-            if quick_result_option_span != None and quick_result_overview_ul != None:
-                # Extract the part of speech tag
-                pos = quick_result_option_span.text.strip("{}")
-                translations = quick_result_overview_ul.stripped_strings
-                all_translations[pos] = [translation for translation in translations]
+            if quick_result_option != None and quick_result_overview != None:
+                quick_result_option_span = quick_result_option.find('span', class_="suffix")
+                quick_result_overview_ul = quick_result_overview.find('ul')
+                
+                if quick_result_option_span != None and quick_result_overview_ul != None:
+                    # Extract the part of speech tag
+                    pos = quick_result_option_span.text.strip("{[]}")
+                    translations = quick_result_overview_ul.stripped_strings
+                    all_translations[pos] = [translation for translation in translations]
 
     return all_translations
 
@@ -139,15 +138,9 @@ def translate_sentence(sentence, source_language="italian", target_language="eng
 
 def demo_translation():
     for line in text_gen('testo_ita.txt'):
-        translate_sentence(line)
+        translate_sentence(line, source_language="italian", target_language="english")
         
 demo_translation()
-
-
-def preprocess_word(word): 
-    punctuation_to_keep = list(["(", ")", ",", "."])
-    if word in punctuation_to_keep:
-        return word
 
     
 def get_first_translation(word, last_word_translated, n_gram_dic):
@@ -171,18 +164,6 @@ def get_first_translation(word, last_word_translated, n_gram_dic):
                 
     else:
         return word
-    
-
-def tokenize_line(line):
-
-    #Specific of italian to replace ' with a letter
-    line = line.replace("'", "a ")
-    
-    tknzr = TweetTokenizer()
-    return tknzr.tokenize(line)    
-
-
-        #return ''.join([char for char in line if char not in punctuation + digits]).split()
 
 
 def create_dictionary(fname):
@@ -220,9 +201,4 @@ for sentence in text_gen('testo_ita.txt'):
         translation = get_first_translation(word, last_word_translated, n_gram_dic)
         print(word + ": " + translation)
         last_word_translated = translation.split(" ")[-1]
-
-# To improve performance
-# Store already translated words and look up there first
-# Partially parse HTML
-# Parse and store only the first translation
         
