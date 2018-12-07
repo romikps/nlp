@@ -11,6 +11,70 @@ import pattern.it
 italian = 'italian-english'
 # POS, Named Entity Recognition, Conjugation, bab.la context sentences, synonyms, expanding contractions
 
+def pos_treebank_to_babla(tag):
+    pos_tags = {
+            # conjunction
+            "CC": ["conj."],
+            # determiner
+            "DT": ["art.", "adj."],
+            # conjunction, subordinating or preposition
+            "IN": ["conj.", "prp."],
+            # adjective
+            "JJ": ["adj."],
+            # adjective, comparative
+            "JJR": ["adj."],
+            # adjective, superlative
+            "JJS": ["adj."],
+            # verb, modal auxillary
+            "MD": ["vb"],
+            # noun, singular or mass
+            "NN": ["noun"],
+            # noun, plural
+            "NNS": ["noun"],
+            # noun, proper singular
+            "NNP": ["pr.n."],
+            # noun, proper plural
+            "NNPS": ["pr.n."],
+            # predeterminer
+            "PDT": ["adj"],
+            # possessive ending
+            "POS": [],
+            # pronoun, personal
+            "PRP": ["pron."],
+            # pronoun, possessive
+            "PRP$": ["pron."],
+            # adverb
+            "RB": ["adv."],
+            # adverb, comparative
+            "RBR": ["adv."],
+            # adverb, superlative
+            "RBS": ["adv."],
+            # adverb, particle
+            "RP": ["adv."],
+            # interjection
+            "UH": ["interj."],
+            # verb, base form
+            "VB": ["vb", "v.t.", "v.i."],
+            # verb, 3rd person singular present
+            "VBZ": ["vb", "v.t.", "v.i."],
+            # verb, non-3rd person singular present
+            "VBP": ["vb", "v.t.", "v.i."],
+            # verb, past tense
+            "VBD": ["vb", "v.t.", "v.i."],
+            # verb, past participle
+            "VBN": ["adj.", "vb", "v.t.", "v.i."],
+            # verb, gerund or present participle
+            "VBG": ["adj.", "noun", "vb", "v.t.", "v.i."],
+            # wh-determiner
+            "WDT": ["adj.", "pron."],
+            # wh-pronoun, personal
+            "WP": ["pron."],
+            # wh-pronoun, possessive
+            "WP$": ["pron."],
+            # wh-adverb
+            "WRB": ["adv."]
+            }
+
 def parse_sentence(sentence):
     sentence = "I've eatten a pizza with a fork."
     sentence = "You aren't a student."    
@@ -56,7 +120,7 @@ def translate(word):
 
     return all_translations
 
-print(translate('casa'))
+print(translate('prova'))
   
     
 def get_first_translation(word, last_word_translated, n_gram_dic):
