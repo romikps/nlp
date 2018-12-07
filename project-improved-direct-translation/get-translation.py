@@ -4,17 +4,14 @@ from string import punctuation, digits
 import csv
 import urllib.parse
 
-italian = 'italiensk-engelsk'
-swedish = 'svensk-engelsk'
-
-
+italian = 'italian-english'
+# POS, Named Entity Recognition, Conjugation, bab.la context sentences, synonyms
 
 def translate(word):
 
-	url = f"https://sv.bab.la/lexikon/{italian}/{word}"
+	url = f"https://en.bab.la/lexikon/{italian}/{word}"
 	url = urllib.parse.urlsplit(url)
-	url = list(url)
-	url[2] = urllib.parse.quote(url[2])
+	url.path = urllib.parse.quote(url.path)
 	url = urllib.parse.urlunsplit(url)
 	contents = urllib.request.urlopen(url).read()
 

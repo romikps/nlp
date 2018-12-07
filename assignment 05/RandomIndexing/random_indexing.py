@@ -12,7 +12,7 @@ import itertools
 
 
 class RandomIndexing(object):
-    def __init__(self, filenames, dimension=2000, non_zero=100, non_zero_values=[-1, 1], left_window_size=3, right_window_size=3):
+    def __init__(self, filenames, dimension=2000, non_zero=100, non_zero_values=[-1, 1], left_window_size=1, right_window_size=4):
         self.__sources = filenames
         self.__vocab = set()
         self.__dim = dimension
@@ -80,7 +80,6 @@ class RandomIndexing(object):
             self.__rv.setdefault(word, rv_vec)
             self.__cv.setdefault(word, cv_vec)
 
-        line_counter = 0
         for words in self.text_gen():
             counter = 0
             for word in words:
@@ -101,9 +100,6 @@ class RandomIndexing(object):
                     self.__cv[word] += self.__rv[words[counter+right_index]]         
 
                 counter += 1
-            line_counter += 1
-        print(self.__cv[word].shape)
-        pass
 
     def find_nearest(self, words, k=5, metric='cosine'):
         """
