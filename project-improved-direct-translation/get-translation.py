@@ -3,8 +3,14 @@ import urllib.parse
 from bs4 import BeautifulSoup
 from string import punctuation, digits
 import csv
-import pattern
+import itertools
+import pattern.en
+import pattern.it
+import pattern.fr
+import pattern.de
+import pattern.es
 from pos_tags import pos_tags
+from ngram import NGramDictionary
 
 
 italian = 'italian-english'
@@ -127,18 +133,37 @@ def text_gen(fname):
                     yield line
                     
                     
-def translate_sentence(sentence, source_language="italian", target_language="english"):
-    parsed_sentence= parse_sentence(sentence, source_language)
+def translate_sentence(sentence, source_language="italian", target_language="english", ngram_dictionary=None):
+    parsed_sentence = parse_sentence(sentence, source_language)
+    translations = []
     for (word, pos_tag) in parsed_sentence:
         if word in punctuation:
-            print([word])
+            translations.append([word])
         else:
-            print(translate(word, pos_tag, source_language, target_language))
+            translations.append(translate(word, pos_tag, source_language, target_language))
+    
 
-
+def get_translated_sentence(translations, ngram_dictionary=None):
+    if == None:
+        return " ".join([translation[0] for translation in translations])
+    else:
+        for first_word_translations, second_word_translations in zip(translations, translations[1:]):
+            
+                
+                
+def get_most_probable_bigram_translation(first_word_options, second_word_options, ngram_dictionary):
+    max_count = 0
+    for bigram in itertools.product(first_word_options, second_word_options):
+                first_word, second_word = bigram
+                ngram_dictionary.get_count(first_word, second_word)
+    
+    
+            
 def demo_translation():
+    ngram = NGramDictionary()
     for line in text_gen('testo_ita.txt'):
-        translate_sentence(line, source_language="italian", target_language="english")
+        translate_sentence(line, source_language="italian", target_language="english", ngram_dictionary=ngram)
+        
         
 demo_translation()
 
@@ -165,33 +190,6 @@ def get_first_translation(word, last_word_translated, n_gram_dic):
     else:
         return word
 
-
-def create_dictionary(fname):
-    
-    outside_dict = dict()
-
-    with open(fname, 'r') as f:
-        reader = csv.reader(f, delimiter="\t")
-        for row in reader:
-            prob = row[0]
-            outside_key = row[1]
-            inside_key= row[2]
-            try:
-                outside_dict[outside_key].append((inside_key, prob))
-            except KeyError:
-                outside_dict[outside_key] = list()
-                outside_dict[outside_key].append((inside_key, prob))
-
-    for key in outside_dict.keys():
-        inside_list = outside_dict[key]
-        inside_dict = dict(inside_list)
-        outside_dict[key] = inside_dict
-    
-
-    return outside_dict
-
-
-n_gram_dic = create_dictionary("bigram_prob_non_sensitive.txt")
 
 last_word_translated = ""
 for sentence in text_gen('testo_ita.txt'):
