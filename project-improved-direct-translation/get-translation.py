@@ -3,7 +3,6 @@ import urllib.parse
 from bs4 import BeautifulSoup
 from string import punctuation, digits
 import csv
-import itertools
 import pattern.en
 import pattern.it
 import pattern.fr
@@ -133,6 +132,33 @@ def text_gen(fname):
                     yield line
                     
                     
+def get_most_probable_bigram_translation(first_word, second_word_options, ngram_dictionary):
+    max_count = 0
+    second_word = second_word_options[0]
+    for second_word_option in second_word_options:
+        current_option_count = ngram_dictionary.get_count(first_word, second_word_option)
+        if current_option_count > max_count:
+            max_count = current_option_count
+            second_word = second_word_option
+    return second_word
+            
+            
+def get_translated_sentence(translations, ngram_dictionary=None):
+    if ngram_dictionary == None:
+        return " ".join([translation[0] for translation in translations])
+    else:
+        current_word_translation = ""
+        sentence_translation = []
+        for next_word_translation_options in translations:
+            next_word_translation = get_most_probable_bigram_translation(current_word_translation, \
+                                                                         next_word_translation_options, \
+                                                                         ngram_dictionary)
+            sentence_translation.append(next_word_translation)
+            current_word_translation = next_word_translation
+       
+        return " ".join(sentence_translation)
+     
+            
 def translate_sentence(sentence, source_language="italian", target_language="english", ngram_dictionary=None):
     parsed_sentence = parse_sentence(sentence, source_language)
     translations = []
@@ -143,22 +169,6 @@ def translate_sentence(sentence, source_language="italian", target_language="eng
             translations.append(translate(word, pos_tag, source_language, target_language))
     
 
-def get_translated_sentence(translations, ngram_dictionary=None):
-    if == None:
-        return " ".join([translation[0] for translation in translations])
-    else:
-        for first_word_translations, second_word_translations in zip(translations, translations[1:]):
-            
-                
-                
-def get_most_probable_bigram_translation(first_word_options, second_word_options, ngram_dictionary):
-    max_count = 0
-    for bigram in itertools.product(first_word_options, second_word_options):
-                first_word, second_word = bigram
-                ngram_dictionary.get_count(first_word, second_word)
-    
-    
-            
 def demo_translation():
     ngram = NGramDictionary()
     for line in text_gen('testo_ita.txt'):
