@@ -139,7 +139,12 @@ def get_sentence_word_translations(sentence, source_language="italian", target_l
         if word in punctuation:
             translations.append([word])
         else:
-            translations.append(translate(word, pos_tag, source_language, target_language))
+            word_translations = translate(word, pos_tag, source_language, target_language)
+            if len(word_translations) != 0:
+                translations.append(word_translations)
+            else:
+                translations.append([word])
+                
     return translations
        
             
@@ -179,41 +184,12 @@ def translate_sentence(sentence, source_language="italian", target_language="eng
 def demo_translation():
     ngram = NGramDictionary()
     for line in text_gen('testo_ita.txt'):
-        translate_sentence(line, source_language="italian", target_language="english", ngram_dictionary=ngram)
+        translated_sentence = translate_sentence(line, \
+                                                 source_language="italian", \
+                                                 target_language="english", \
+                                                 ngram_dictionary=ngram)
+        print(translated_sentence)
         
         
 demo_translation()
 
-    
-def get_first_translation(word, last_word_translated, n_gram_dic):
-    all_translations = translate(word)
-    best_translation = ""
-    best_prob = 0
-    if len(all_translations) > 0:
-        best_translation = all_translations[0][0]
-        for translations in all_translations:
-            for translation in translations:
-                first_translation_word = translation.split(" ")[0]
-                try:
-                    prob = int(n_gram_dic[last_word_translated][first_translation_word])
-                    if prob > best_prob:
-                        best_prob = prob
-                        best_translation = translation
-                except KeyError:
-                    continue
-
-        return best_translation
-                
-    else:
-        return word
-
-
-last_word_translated = ""
-for sentence in text_gen('testo_ita.txt'):
-    print(sentence)
-    for word in sentence:
-        print(word)
-        translation = get_first_translation(word, last_word_translated, n_gram_dic)
-        print(word + ": " + translation)
-        last_word_translated = translation.split(" ")[-1]
-        

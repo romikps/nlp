@@ -10,9 +10,9 @@ class NGramDictionary:
             for row in reader:
                 count, first_word, second_word = row
                 if first_word in self.dictionary:
-                    self.dictionary[first_word][second_word] = count
+                    self.dictionary[first_word][second_word] = int(count)
                 else:
-                    self.dictionary[first_word] = {second_word: count}
+                    self.dictionary[first_word] = {second_word: int(count)}
                     
                     
     def get_count(self, first_word, second_word):
