@@ -132,6 +132,17 @@ def text_gen(fname):
                     yield line
                     
                     
+def get_sentence_word_translations(sentence, source_language="italian", target_language="english"):
+    parsed_sentence = parse_sentence(sentence, source_language)
+    translations = []
+    for (word, pos_tag) in parsed_sentence:
+        if word in punctuation:
+            translations.append([word])
+        else:
+            translations.append(translate(word, pos_tag, source_language, target_language))
+    return translations
+       
+            
 def get_most_probable_bigram_translation(first_word, second_word_options, ngram_dictionary):
     max_count = 0
     second_word = second_word_options[0]
@@ -160,13 +171,9 @@ def get_translated_sentence(translations, ngram_dictionary=None):
      
             
 def translate_sentence(sentence, source_language="italian", target_language="english", ngram_dictionary=None):
-    parsed_sentence = parse_sentence(sentence, source_language)
-    translations = []
-    for (word, pos_tag) in parsed_sentence:
-        if word in punctuation:
-            translations.append([word])
-        else:
-            translations.append(translate(word, pos_tag, source_language, target_language))
+    individual_word_translations = get_sentence_word_translations(sentence, source_language, target_language)
+    translated_sentence = get_translated_sentence(individual_word_translations, ngram_dictionary)
+    return translated_sentence
     
 
 def demo_translation():
