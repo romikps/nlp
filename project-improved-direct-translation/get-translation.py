@@ -4,94 +4,58 @@ from string import punctuation, digits
 import csv
 import urllib.parse
 from nltk.tokenize import TweetTokenizer
-import pattern.en
-import pattern.it
+import pattern
+from pos_tags import pos_tags
 
 
 italian = 'italian-english'
 # POS, Named Entity Recognition, Conjugation, bab.la context sentences, synonyms, expanding contractions
 
-def pos_treebank_to_babla(tag):
-    pos_tags = {
-            # conjunction
-            "CC": ["conj."],
-            # determiner
-            "DT": ["art.", "adj."],
-            # conjunction, subordinating or preposition
-            "IN": ["conj.", "prp."],
-            # adjective
-            "JJ": ["adj."],
-            # adjective, comparative
-            "JJR": ["adj."],
-            # adjective, superlative
-            "JJS": ["adj."],
-            # verb, modal auxillary
-            "MD": ["vb"],
-            # noun, singular or mass
-            "NN": ["noun"],
-            # noun, plural
-            "NNS": ["noun"],
-            # noun, proper singular
-            "NNP": ["pr.n."],
-            # noun, proper plural
-            "NNPS": ["pr.n."],
-            # predeterminer
-            "PDT": ["adj"],
-            # possessive ending
-            "POS": [],
-            # pronoun, personal
-            "PRP": ["pron."],
-            # pronoun, possessive
-            "PRP$": ["pron."],
-            # adverb
-            "RB": ["adv."],
-            # adverb, comparative
-            "RBR": ["adv."],
-            # adverb, superlative
-            "RBS": ["adv."],
-            # adverb, particle
-            "RP": ["adv."],
-            # interjection
-            "UH": ["interj."],
-            # verb, base form
-            "VB": ["vb", "v.t.", "v.i."],
-            # verb, 3rd person singular present
-            "VBZ": ["vb", "v.t.", "v.i."],
-            # verb, non-3rd person singular present
-            "VBP": ["vb", "v.t.", "v.i."],
-            # verb, past tense
-            "VBD": ["vb", "v.t.", "v.i."],
-            # verb, past participle
-            "VBN": ["adj.", "vb", "v.t.", "v.i."],
-            # verb, gerund or present participle
-            "VBG": ["adj.", "noun", "vb", "v.t.", "v.i."],
-            # wh-determiner
-            "WDT": ["adj.", "pron."],
-            # wh-pronoun, personal
-            "WP": ["pron."],
-            # wh-pronoun, possessive
-            "WP$": ["pron."],
-            # wh-adverb
-            "WRB": ["adv."]
-            }
-
-def parse_sentence(sentence):
-    sentence = "I've eatten a pizza with a fork."
-    sentence = "You aren't a student."    
-    tagged_sentence = pattern.en.tag(sentence)
-    print(tagged_sentence)
-    
-
-def preprocess_word(word): 
-    punctuation_to_keep = list(["(", ")", ",", "."])
-    if word in punctuation_to_keep:
-        return word
+def pos_treebank_to_babla(tag): 
+    '''
+    Convert Penn Treebank II tag to respective bab.la part-of-speech tag/s.
+    '''
+    if tag in pos_tags:
+        return pos_tags[tag]["babla"]
+    else:
+        return []
 
 
-def translate(word):
+def parse_sentence(sentence, language="english"):
+    '''
+    Tokenize sentence and tag tokens with part-of-speech labels.
+    return [(token, pos_tag)]
+    ''' 
+    if language == "english":
+        tagged_sentence = pattern.en.tag(sentence)
+    elif language == "italian":
+        tagged_sentence = pattern.it.tag(sentence)
+    elif language == "spanish":
+        tagged_sentence = pattern.es.tag(sentence)
+    elif language == "german":
+        tagged_sentence = pattern.de.tag(sentence)
+    elif language == "french":
+        tagged_sentence = pattern.fr.tag(sentence)
+    elif language == "dutch":
+        tagged_sentence = pattern.nl.tag(sentence)
+    else:
+        tagged_sentence = pattern.en.tag(sentence)
+        
+    return tagged_sentence
+
+def get_babla_url(word, source_language="italian", target_language="english"):
     # ASCII encode
     word_encoded = urllib.parse.quote(word)
-    url = f"https://en.bab.la/lexikon/{italian}/{word_encoded}"
+    url = f"https://en.bab.la/dictionary/{source_language}-{target_language}/{word_encoded}"
+    return url
+        
+    
+def lookup(word, source_language="italian", target_language="english"):
+    '''
+    Create a dictionary of translations with POS labels as keys.
+    return {'vb': ['to instantiate', 'to try on']}
+    '''
+    url = get_babla_url(word, source_language, target_language)
     contents = urllib.request.urlopen(url).read()
 
     soup = BeautifulSoup(contents, 'html.parser')
@@ -111,17 +75,80 @@ def translate(word):
                 return all_translations
             
         quick_result_option = quick_result.find('div', class_='quick-result-option')
-        if quick_result_option != None:
-            # Extract the part of speech tag
-            pos = quick_result_option.find('span', class_="suffix").text.strip("{}")
-            translations = quick_result.find('div', class_="quick-result-overview").find('ul')
-            if translations != None:
-                all_translations[pos] = [translation for translation in translations.stripped_strings]
+        quick_result_overview = quick_result.find('div', class_="quick-result-overview")
+        
+        if quick_result_option != None and quick_result_overview != None:
+            quick_result_option_span = quick_result_option.find('span', class_="suffix")
+            quick_result_overview_ul = quick_result_overview.find('ul')
+            
+            if quick_result_option_span != None and quick_result_overview_ul != None:
+                # Extract the part of speech tag
+                pos = quick_result_option_span.text.strip("{}")
+                translations = quick_result_overview_ul.stripped_strings
+                all_translations[pos] = [translation for translation in translations]
 
     return all_translations
 
-print(translate('prova'))
-  
+
+def merge_translations_arrays(translations_arrays):
+    '''
+    Get unique translations from array of arrays with translations.
+    '''
+    unique_translations = list(set([translation \
+                            for translations in translations_arrays \
+                            for translation in translations]))
+    
+    return unique_translations
+    
+    
+def translate(word, pos_tag=None, source_language="italian", target_language="english"):
+    '''Return array of translations.'''
+    dictionary = lookup(word, source_language, target_language)
+    translations = []
+    if pos_tag == None:
+        translations = dictionary.values()
+    else:
+        babla_tags = pos_treebank_to_babla(pos_tag)
+        for babla_tag in babla_tags:
+            if babla_tag in dictionary:
+                translations.append(dictionary[babla_tag])
+                
+    if len(translations) == 0:
+        translations = dictionary.values()
+    
+    return merge_translations_arrays(translations)
+    
+    
+def text_gen(fname):
+    '''
+    Produce next line from the specified file.
+    '''
+    with open(fname, encoding='utf8', errors='ignore') as f:
+                for line in f:
+                    yield line
+                    
+                    
+def translate_sentence(sentence, source_language="italian", target_language="english"):
+    parsed_sentence= parse_sentence(sentence, source_language)
+    for (word, pos_tag) in parsed_sentence:
+        if word in punctuation:
+            print([word])
+        else:
+            print(translate(word, pos_tag, source_language, target_language))
+
+
+def demo_translation():
+    for line in text_gen('testo_ita.txt'):
+        translate_sentence(line)
+        
+demo_translation()
+
+
+def preprocess_word(word): 
+    punctuation_to_keep = list(["(", ")", ",", "."])
+    if word in punctuation_to_keep:
+        return word
+
     
 def get_first_translation(word, last_word_translated, n_gram_dic):
     all_translations = translate(word)
@@ -156,12 +183,6 @@ def tokenize_line(line):
 
 
         #return ''.join([char for char in line if char not in punctuation + digits]).split()
-
-
-def text_gen(fname):
-    with open(fname, encoding='utf8', errors='ignore') as f:
-                for line in f:
-                    yield tokenize_line(line)
 
 
 def create_dictionary(fname):
