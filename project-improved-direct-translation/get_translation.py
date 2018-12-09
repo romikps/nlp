@@ -99,13 +99,11 @@ def lookup(word, source_language="italian", target_language="english"):
 
 def merge_translations_arrays(translations_arrays):
     '''
-    Get unique translations from array of arrays with translations.
+    Get all translations from array of arrays with translations.
     '''
-    unique_translations = list(set([translation \
-                            for translations in translations_arrays \
-                            for translation in translations]))
-    
-    return unique_translations
+    return [translation \
+                for translations in translations_arrays \
+                for translation in translations]
 
     
 def translate(word, pos_tag=None, source_language="italian", target_language="english"):
