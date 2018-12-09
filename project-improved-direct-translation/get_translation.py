@@ -146,8 +146,7 @@ def get_sentence_word_translations(sentence, source_language="italian", target_l
             if len(word_translations) != 0:
                 translations.append(word_translations)
             else:
-                translations.append([word])
-                
+                translations.append([word])             
     return translations
        
             
