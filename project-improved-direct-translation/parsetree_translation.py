@@ -37,8 +37,17 @@ def parse_text(text, language="english"):
     return parsed_text
 
 
+def remove_infinitive_to(verb):
+    if verb.startswith("to "):
+        return verb[3:]
+    else:
+        return verb
+
+
 def adjust_translations(word, translations, source_language, target_language):
     if target_language == "english":
+        if word.type.startswith("VB"):
+            translations = list(map(remove_infinitive_to, translations))
         
         # noun, plural
         if word.type == "NNS":
@@ -71,7 +80,7 @@ def translate_word(word, source_language, target_language):
     '''
     if not (word.string in punctuation or \
             word.string in digits):
-        translations = translate(word.string, word.type, source_language, target_language)
+        translations = translate(word.lemma, word.type, source_language, target_language)
         if len(translations) == 0:
             return [word.string]
         else:
@@ -87,7 +96,7 @@ def translate_sentence(sentence, source_language, target_language):
     translations = []
     for word in sentence.words:
         translation = translate_word(word, source_language, target_language)
-        print(word.string, translation)
+        print(word.lemma, word.type, translation)
         translations.append(translation)
     return get_translated_sentence(translations, bigram)
             
@@ -98,7 +107,7 @@ def new_demo_with_parsetrees():
     for sentence in parsed_text:
         print(sentence)
         print(translate_sentence(sentence, "italian", "english"))
-        break
+        print()
            
     
 # Using TREES playground
