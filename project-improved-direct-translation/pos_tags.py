@@ -1,3 +1,6 @@
+# https://www.clips.uantwerpen.be/pages/MBSP-tags
+# https://www.clips.uantwerpen.be/pages/pattern-en
+# https://www.clips.uantwerpen.be/pages/pattern-it
 pos_tags = {
         "CC": {
                 "full_name": "conjunction",
