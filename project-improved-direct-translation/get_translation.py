@@ -70,7 +70,7 @@ def lookup(word, source_language="italian", target_language="english"):
     for quick_result in soup.body.find('div', class_='quick-results') \
                             .find_all('div', class_=['quick-results-header', \
                                                      'quick-result-entry']):
-        if quick_result['class'] == 'quick-results-header':
+        if 'quick-results-header' in quick_result['class']:
             if not seen_quick_results_header:
                 # Skip first results header
                 seen_quick_results_header = True
@@ -90,8 +90,10 @@ def lookup(word, source_language="italian", target_language="english"):
                     # Extract the part of speech tag
                     pos = quick_result_option_span.text.strip("{[]}")
                     translations = quick_result_overview_ul.stripped_strings
-                    all_translations[pos] = [translation for translation in translations]
-
+                    if pos not in all_translations:
+                        all_translations[pos] = [translation for translation in translations]
+                    else:
+                        all_translations[pos] += [translation for translation in translations]
     return all_translations
 
 
@@ -105,12 +107,6 @@ def merge_translations_arrays(translations_arrays):
     
     return unique_translations
 
-
-def conjugate_verb_it_to_en(verb_it, pos_tag, \
-                              verb_en):
-    pass
-    
-    
     
 def translate(word, pos_tag=None, source_language="italian", target_language="english"):
     '''Return array of translations.'''

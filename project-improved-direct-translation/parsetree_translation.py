@@ -1,7 +1,8 @@
+from string import punctuation, digits
 import pattern.en
 import pattern.it
 from ngram import NGramDictionary
-from get_translation import lookup
+from get_translation import lookup, translate
 
 def read_file(file_name):
     '''
@@ -30,16 +31,40 @@ def parse_text(text, language="english"):
     else:
         parsed_text = pattern.en.parsetree(text, relations=True, lemmata=True)
     return parsed_text
+
              
-       
+def translate_word(word, source_language, target_language):
+    '''
+    Translate the word passed in as a Word object to the target language.
+    '''
+    print(word.lemma)
+    if word.lemma not in punctuation and word.lemma not in digits:
+        translations = translate(word.lemma, word.type, source_language, target_language)
+        print(translations)
+    
+    
+def translate_sentence(sentence, source_language, target_language):
+    '''
+    Translate the sentenence passed in as a Sentence object to the target language.
+    '''
+    for word in sentence.words:
+            translate_word(word, source_language, target_language)
+ 
+      
 def new_demo_with_parsetrees():
     text = read_file("text.txt")
     parsed_text = parse_text(text, language="english")
-    ngram = NGramDictionary()
+    # ngram = NGramDictionary()
     for sentence in parsed_text:
-        for word in sentence.words:
-            print(word)
+        translate_sentence(sentence, "english", "italian")
+        break
                     
+
+
+def conjugate_verb_it_to_en(verb_it, pos_tag, \
+                              verb_en):
+    pass
+    
 
 # Using TREES playground
 text = "Yesterday a ginger cat sat on the mat. I sat next to the cat. What is the cat's name? It's Ginger."
