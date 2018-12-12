@@ -62,7 +62,7 @@ def adjust_translations(word, translations, source_language, target_language):
             return list(map(pattern.en.superlative, translations))
         
         # verb, 3rd person singular present
-        elif word.type == "VBZ":
+        elif word.type == "VBZ" or word.type == "VB":
             return list(map(lambda word: pattern.en.conjugate(word, "3sg"), translations))
         
         # verb, past tense
@@ -116,7 +116,7 @@ def translate_sentence(sentence, source_language, target_language):
     translations = []
     for word in sentence.words:
         translation = translate_word(word, source_language, target_language)
-        # print(word.string, word.type, translation)
+        print(word.string, word.type, translation)
         translations.append(translation)
     return get_translated_sentence(translations, bigram)
             

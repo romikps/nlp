@@ -156,27 +156,43 @@ def get_sentence_word_translations(sentence, source_language="italian", target_l
             else:
                 translations.append([word])             
     return translations
-       
+
+def get_first_word(phrase):
+    words_in_phrase = phrase.split()
+    if len(words_in_phrase) > 0:
+        return words_in_phrase[0]
+    else:
+        phrase
+
+
+def get_last_word(phrase):
+    words_in_phrase = phrase.split()
+    if len(words_in_phrase) > 0:
+        return words_in_phrase[-1]
+    else:
+        phrase
+         
             
-def get_most_probable_bigram_translation(first_word, second_word_options, ngram_dictionary):
+def get_most_probable_translation(first_translation, second_translation_options, ngram_dictionary):        
     max_count = 0
-    second_word = second_word_options[0]
-    for second_word_option in second_word_options:
-        current_option_count = ngram_dictionary.get_count(first_word, second_word_option)
+    second_translation = second_translation_options[0]
+    for second_translation_option in second_translation_options:
+        current_option_count = ngram_dictionary.get_count(get_last_word(first_translation), \
+                                                          get_first_word(second_translation_option))
         if current_option_count > max_count:
             max_count = current_option_count
-            second_word = second_word_option
-    return second_word
+            second_translation = second_translation_option
+    return second_translation
             
             
 def get_translated_sentence(translations, ngram_dictionary=None):
     if ngram_dictionary == None:
         return " ".join([translation[0] for translation in translations])
     else:
-        current_word_translation = ""
-        sentence_translation = []
-        for next_word_translation_options in translations:
-            next_word_translation = get_most_probable_bigram_translation(current_word_translation, \
+        current_word_translation = translations[0][0]
+        sentence_translation = [current_word_translation]
+        for next_word_translation_options in translations[1:]:
+            next_word_translation = get_most_probable_translation(current_word_translation, \
                                                                          next_word_translation_options, \
                                                                          ngram_dictionary)
             sentence_translation.append(next_word_translation)
