@@ -105,10 +105,18 @@ def merge_translations_arrays(translations_arrays):
                 for translations in translations_arrays \
                 for translation in translations]
 
-    
+
+def expand_contracted_determiner(word, source_language="italian", target_language="english"):
+    if source_language=="italian" and "'" in word:
+        return word.replace("'", "a")
+    else:
+        return word
+        
+
 def translate(word, pos_tag=None, source_language="italian", target_language="english"):
     '''Return array of translations.'''
-    dictionary = lookup(word, source_language, target_language)
+    preprocessed_word = expand_contracted_determiner(word)
+    dictionary = lookup(preprocessed_word, source_language, target_language)
     translations = []
     if pos_tag == None:
         translations = dictionary.values()
@@ -128,7 +136,7 @@ def text_gen(fname):
     '''
     Produce next line from the specified file.
     '''
-    with open(fname, encoding='utf8', errors='ignore') as f:
+    with open(fname, errors='ignore') as f:
                 for line in f:
                     yield line
                     
@@ -138,6 +146,8 @@ def get_sentence_word_translations(sentence, source_language="italian", target_l
     translations = []
     for (word, pos_tag) in parsed_sentence:
         if word in punctuation:
+            translations.append([word])
+        elif pos_tag == "NNP":
             translations.append([word])
         else:
             word_translations = translate(word, pos_tag, source_language, target_language)
@@ -183,7 +193,8 @@ def translate_sentence(sentence, source_language="italian", target_language="eng
 
 def demo_translation():
     ngram = NGramDictionary()
-    for line in text_gen('testo_ita.txt'):
+    for line in text_gen('text_it.txt'):
+        print(line)
         translated_sentence = translate_sentence(line, \
                                                  source_language="italian", \
                                                  target_language="english", \

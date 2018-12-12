@@ -80,7 +80,7 @@ def translate_word(word, source_language, target_language):
     '''
     if not (word.string in punctuation or \
             word.string in digits):
-        translations = translate(word.lemma, word.type, source_language, target_language)
+        translations = translate(word.string, word.type, source_language, target_language)
         if len(translations) == 0:
             return [word.string]
         else:
@@ -96,7 +96,7 @@ def translate_sentence(sentence, source_language, target_language):
     translations = []
     for word in sentence.words:
         translation = translate_word(word, source_language, target_language)
-        print(word.lemma, word.type, translation)
+        print(word.string, word.type, translation)
         translations.append(translation)
     return get_translated_sentence(translations, bigram)
             

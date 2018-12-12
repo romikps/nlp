@@ -14,7 +14,7 @@ pos_tags = {
         
         "IN": {
                 "full_name": "conjunction, subordinating or preposition",
-                "babla": ["conj.", "prp."]
+                "babla": ["conj.", "prp.", "c.pr."]
                 },
         
         "JJ": {
@@ -104,32 +104,32 @@ pos_tags = {
         
         "VB": {
                 "full_name": "verb, base form",
-                "babla": ["vb", "v.t.", "v.i."]
+                "babla": ["vb", "v.t.", "v.i.", "r. v."]
                 },
         
         "VBZ": {
                 "full_name": "verb, 3rd person singular present",
-                "babla": ["vb", "v.t.", "v.i."]
+                "babla": ["vb", "v.t.", "v.i.", "r. v."]
                 },
         
         "VBP": {
                 "full_name": "verb, non-3rd person singular present",
-                "babla": ["vb", "v.t.", "v.i."]
+                "babla": ["vb", "v.t.", "v.i.", "r. v."]
                 },
         
         "VBD": {
                 "full_name": "verb, past tense",
-                "babla": ["vb", "v.t.", "v.i."]
+                "babla": ["vb", "v.t.", "v.i.", "r. v."]
                 },
          
         "VBN": {
                 "full_name": "verb, past participle",
-                "babla": ["adj.", "vb", "v.t.", "v.i."]
+                "babla": ["adj.", "vb", "v.t.", "v.i.", "r. v."]
                 },
         
         "VBG": {
                 "full_name": "verb, gerund or present participle",
-                "babla": ["adj.", "noun", "vb", "v.t.", "v.i."]
+                "babla": ["adj.", "noun", "vb", "v.t.", "v.i.", "r. v."]
                 },
         
         "WDT": {
