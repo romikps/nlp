@@ -72,8 +72,8 @@ def adjust_translations(word, translations, source_language, target_language):
             return translations    
     else:
         return translations
-        
-           
+
+   
 def translate_word(word, source_language, target_language):
     '''
     Translate the word passed in as a Word object to the target language.
@@ -88,6 +88,26 @@ def translate_word(word, source_language, target_language):
     else:
         return [word.string]
 
+
+def conjugate_3rd_person_present(english_translation):
+    parsed_translation = pattern.en.parsetree(english_translation, relations=True, lemmata=True)
+    new_translation = []
+    for sentence in parsed_translation:
+        for word in sentence.words:
+            if word.type == "VB":
+                subject = word.chunk.subject
+                if subject != None:
+                    if subject.head.type == "NN":
+                         conjugated_verb = pattern.en.conjugate(word.string, "3sg")
+                         new_translation.append(conjugated_verb)
+                    else:
+                        new_translation.append(word.string)
+                else:
+                    new_translation.append(word.string)          
+            else:
+                new_translation.append(word.string)
+    return " ".join(new_translation)
+
     
 def translate_sentence(sentence, source_language, target_language):
     '''
@@ -96,18 +116,24 @@ def translate_sentence(sentence, source_language, target_language):
     translations = []
     for word in sentence.words:
         translation = translate_word(word, source_language, target_language)
-        print(word.string, word.type, translation)
+        # print(word.string, word.type, translation)
         translations.append(translation)
     return get_translated_sentence(translations, bigram)
             
       
 def new_demo_with_parsetrees():
+    source_language = "italian"
+    target_language = "english"
     text = read_file("text_it.txt")
     parsed_text = parse_text(text, language="italian")
     for sentence in parsed_text:
         print(sentence)
-        print(translate_sentence(sentence, "italian", "english"))
-        print()
+        translated_sentence = translate_sentence(sentence, source_language, target_language)
+        if target_language == "english":
+            conjugated_sentence = conjugate_3rd_person_present(translated_sentence)
+            print(conjugated_sentence)
+        else:
+            print(translated_sentence)
            
     
 # Using TREES playground
