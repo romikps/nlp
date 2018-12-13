@@ -232,7 +232,7 @@ def get_translated_sentence(translations, ngram_dictionary=None):
             sentence_translation = [get_most_probable_word(translations[0], unigram),
                                     get_most_probable_word(translations[1], unigram)]
             for next_word_translation_options in translations[2:]:
-                next_word_translation = get_most_probable_translation_bigram(sentence_translation[-2], \
+                next_word_translation = get_most_probable_translation_trigram(sentence_translation[-2], \
                                                                              sentence_translation[-1], \
                                                                              next_word_translation_options, \
                                                                              ngram_dictionary)
