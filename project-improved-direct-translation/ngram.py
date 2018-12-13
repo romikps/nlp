@@ -55,7 +55,7 @@ class NGramDictionary:
     def create_unigrams(self):
         frequency_list = FreqDist(word.lower() for word in brown.words())
         # frequency_list.most_common()[:10]        
-        with open('word_frequencies.txt', 'w') as f:
+        with open('word_frequencies.txt', 'w', newline='') as f:
             file = csv.writer(f, delimiter="\t")
             for word in frequency_list:
                 file.writerow([word, frequency_list[word]])
