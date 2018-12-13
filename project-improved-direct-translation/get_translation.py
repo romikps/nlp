@@ -238,7 +238,7 @@ def get_translated_sentence(translations, ngram_dictionary=None):
                                                                              ngram_dictionary)
                 sentence_translation.append(next_word_translation)
         else:
-            raise ValueError("A bigram or trigram dictionary must be passed as an argument.")
+            return " ".join([get_most_probable_word(translation, unigram) for translation in translations])
                    
         return " ".join(sentence_translation)
      
