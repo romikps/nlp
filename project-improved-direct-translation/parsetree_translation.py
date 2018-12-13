@@ -6,7 +6,9 @@ from get_translation import lookup, translate, get_translated_sentence
 
 
 PATTERN_SUPPORTED_LANGUAGES = ["english", "german", "italian", "spanish", "dutch", "french"]
-bigram = NGramDictionary()
+unigram = NGramDictionary(n=1)
+bigram = NGramDictionary(n=2)
+trigram = NGramDictionary(n=3)
 
 
 def read_file(file_name):
@@ -117,9 +119,14 @@ def translate_sentence(sentence, source_language, target_language):
     translations = []
     for word in sentence.words:
         translation = translate_word(word, source_language, target_language)
-        print(word.string, word.type, translation)
+        # print(word.string, word.type, translation)
         translations.append(translation)
     return get_translated_sentence(translations, bigram)
+
+
+def get_most_frequent_word(words, unigram):
+    return max([{"word": word, "count": unigram.get_count(word.lower())} \
+          for word in words], key=lambda item: item["count"])["word"]
 
 
 def translate_text_from_unsupported_language(text, source_language, target_language):
@@ -134,10 +141,9 @@ def translate_text_from_unsupported_language(text, source_language, target_langu
                 if len(translations) == 0:
                     word_translation = word.string
                 else:
-                    word_translation = translations[0]
+                    word_translation = get_most_frequent_word(translations, unigram)
             else:
                 word_translation = word.string
-            print(word, word_translation)
             translated_words.append(word_translation)
         print(sentence)
         translated_sentence = " ".join(translated_words)
