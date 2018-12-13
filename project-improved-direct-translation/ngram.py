@@ -5,6 +5,7 @@ from nltk.corpus import brown
 class NGramDictionary:
     def __init__(self, n=1):
         self.dictionary = {}
+        self.n = n
         if n == 1:
             self.load_unigrams()
         elif n == 2:

@@ -83,7 +83,13 @@ def translate_word(word, source_language, target_language):
     '''
     if not (word.string in punctuation or \
             word.string in digits):
-        translations = translate(word.string, word.type, source_language, target_language)
+        
+        # Check if a tree parser exists for the source language, otherwise the assigned POS tags are wrong
+        if source_language in PATTERN_SUPPORTED_LANGUAGES:
+            translations = translate(word.string, word.type, source_language, target_language)
+        else:
+            translations = translate(word.string, None, source_language, target_language)
+            
         if len(translations) == 0:
             return [word.string]
         else:
@@ -112,7 +118,7 @@ def conjugate_3rd_person_present(english_translation):
     return " ".join(new_translation)
 
     
-def translate_sentence(sentence, source_language, target_language):
+def translate_sentence(sentence, source_language, target_language, ngram_dictionary=None):
     '''
     Translate the sentenence passed in as a Sentence object to the target language.
     '''
@@ -121,53 +127,23 @@ def translate_sentence(sentence, source_language, target_language):
         translation = translate_word(word, source_language, target_language)
         # print(word.string, word.type, translation)
         translations.append(translation)
-    return get_translated_sentence(translations, bigram)
-
-
-def get_most_frequent_word(words, unigram):
-    return max([{"word": word, "count": unigram.get_count(word.lower())} \
-          for word in words], key=lambda item: item["count"])["word"]
-
-
-def translate_text_from_unsupported_language(text, source_language, target_language):
-    parsed_text = parse_text(text, language="english")
-    for sentence in parsed_text:
-        translated_words = []
-        for word in sentence.words:
-            word_translation = ""
-            if not (word.string in punctuation or \
-                    word.string in digits):
-                translations = translate(word.string, None, source_language, target_language)
-                if len(translations) == 0:
-                    word_translation = word.string
-                else:
-                    word_translation = get_most_frequent_word(translations, unigram)
-            else:
-                word_translation = word.string
-            translated_words.append(word_translation)
-        print(sentence)
-        translated_sentence = " ".join(translated_words)
-        print(translated_sentence)
-
+    return get_translated_sentence(translations, ngram_dictionary)
       
+
 def new_demo_with_parsetrees():
     source_language = "swedish"
     target_language = "english"
     text = read_file("text_se.txt")
     parsed_text = parse_text(text, language=source_language)
-    if source_language in PATTERN_SUPPORTED_LANGUAGES:
-        for sentence in parsed_text:
-            print(sentence)
-            translated_sentence = translate_sentence(sentence, source_language, target_language)
-            if target_language == "english":
-                conjugated_sentence = conjugate_3rd_person_present(translated_sentence)
-                print(conjugated_sentence)
-            else:
-                print(translated_sentence)
-    else:
-        translate_text_from_unsupported_language(text, source_language, target_language)
-        
-           
+    for sentence in parsed_text:
+        print(sentence)
+        translated_sentence = translate_sentence(sentence, source_language, target_language, bigram)
+        if target_language == "english":
+            conjugated_sentence = conjugate_3rd_person_present(translated_sentence)
+            print(conjugated_sentence)
+        else:
+            print(translated_sentence)
+    
     
 # Using TREES playground
 def playground():

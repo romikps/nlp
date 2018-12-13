@@ -13,6 +13,7 @@ from ngram import NGramDictionary
 
 
 italian = 'italian-english'
+unigram = NGramDictionary(n=1)
 # POS, Named Entity Recognition, Conjugation, bab.la context sentences, synonyms, expanding contractions
 
 def pos_treebank_to_babla(tag): 
@@ -160,6 +161,7 @@ def get_sentence_word_translations(sentence, source_language="italian", target_l
                 translations.append([word])             
     return translations
 
+
 def get_first_word(phrase):
     words_in_phrase = phrase.split()
     if len(words_in_phrase) > 0:
@@ -174,33 +176,70 @@ def get_last_word(phrase):
         return words_in_phrase[-1]
     else:
         phrase
+        
+
+def get_most_probable_word(words, unigram):
+    if unigram.n != 1:
+        raise ValueError("A unigram dictionary must be passed as an argument.")
+    return max([{"word": word, "count": unigram.get_count(word.lower())} \
+          for word in words], key=lambda item: item["count"])["word"]
          
             
-def get_most_probable_translation(first_translation, second_translation_options, ngram_dictionary):        
+def get_most_probable_translation_bigram(first_translation, second_translation_options, bigram): 
+    if bigram.n != 2:
+        raise ValueError("A bigram dictionary must be passed as an argument.")
     max_count = 0
     second_translation = second_translation_options[0]
     for second_translation_option in second_translation_options:
-        current_option_count = ngram_dictionary.get_count(get_last_word(first_translation), \
-                                                          get_first_word(second_translation_option))
+        current_option_count = bigram.get_count((get_last_word(first_translation).lower(),
+                                                 get_first_word(second_translation_option).lower()))
         if current_option_count > max_count:
             max_count = current_option_count
             second_translation = second_translation_option
     return second_translation
-            
+
+
+def get_most_probable_translation_trigram(first_translation, second_translation, \
+                                  third_translation_options, trigram):
+    if trigram.n != 3:
+        raise ValueError("A trigram dictionary must be passed as an argument.")        
+    max_count = 0
+    third_translation = third_translation_options[0]
+    for third_translation_option in third_translation_options:
+        current_option_count = trigram.get_count((get_last_word(first_translation).lower(), \
+                                                  second_translation.lower(), \
+                                                  get_first_word(third_translation_option).lower()))
+        if current_option_count > max_count:
+            max_count = current_option_count
+            third_translation = third_translation_option
+    return third_translation
+
             
 def get_translated_sentence(translations, ngram_dictionary=None):
     if ngram_dictionary == None:
-        return " ".join([translation[0] for translation in translations])
+        # return " ".join([translation[0] for translation in translations])
+        return " ".join([get_most_probable_word(translation, unigram) for translation in translations])
     else:
-        current_word_translation = translations[0][0]
-        sentence_translation = [current_word_translation]
-        for next_word_translation_options in translations[1:]:
-            next_word_translation = get_most_probable_translation(current_word_translation, \
-                                                                         next_word_translation_options, \
-                                                                         ngram_dictionary)
-            sentence_translation.append(next_word_translation)
-            current_word_translation = next_word_translation
-       
+        if ngram_dictionary.n == 2 and len(translations) >= 2:
+            sentence_translation = [get_most_probable_word(translations[0])]
+            for next_word_translation_options in translations[1:]:
+                next_word_translation = get_most_probable_translation_bigram(sentence_translation[-1], \
+                                                                             next_word_translation_options, \
+                                                                             ngram_dictionary)
+                sentence_translation.append(next_word_translation)
+        
+        elif ngram_dictionary.n == 3 and len(translations) >= 3:
+            sentence_translation = [get_most_probable_word(translations[0]),
+                                    get_most_probable_word(translations[1])]
+            for next_word_translation_options in translations[2:]:
+                next_word_translation = get_most_probable_translation_bigram(sentence_translation[-2], \
+                                                                             sentence_translation[-1], \
+                                                                             next_word_translation_options, \
+                                                                             ngram_dictionary)
+                sentence_translation.append(next_word_translation)
+        else:
+            raise ValueError("A bigram or trigram dictionary must be passed as an argument.")
+                   
         return " ".join(sentence_translation)
      
             
