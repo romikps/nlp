@@ -49,8 +49,8 @@ def remove_infinitive_to(verb):
 
 def adjust_translations(word, translations, source_language, target_language):
     if target_language == "english":
-        if word.type.startswith("VB"):
-            translations = list(map(remove_infinitive_to, translations))
+        # if word.type.startswith("VB"):
+        translations = list(map(remove_infinitive_to, translations))
         
         # noun, plural
         if word.type == "NNS":

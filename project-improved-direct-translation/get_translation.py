@@ -221,7 +221,7 @@ def get_translated_sentence(translations, ngram_dictionary=None):
         return " ".join([get_most_probable_word(translation, unigram) for translation in translations])
     else:
         if ngram_dictionary.n == 2 and len(translations) >= 2:
-            sentence_translation = [get_most_probable_word(translations[0])]
+            sentence_translation = [get_most_probable_word(translations[0], unigram)]
             for next_word_translation_options in translations[1:]:
                 next_word_translation = get_most_probable_translation_bigram(sentence_translation[-1], \
                                                                              next_word_translation_options, \
@@ -229,8 +229,8 @@ def get_translated_sentence(translations, ngram_dictionary=None):
                 sentence_translation.append(next_word_translation)
         
         elif ngram_dictionary.n == 3 and len(translations) >= 3:
-            sentence_translation = [get_most_probable_word(translations[0]),
-                                    get_most_probable_word(translations[1])]
+            sentence_translation = [get_most_probable_word(translations[0], unigram),
+                                    get_most_probable_word(translations[1], unigram)]
             for next_word_translation_options in translations[2:]:
                 next_word_translation = get_most_probable_translation_bigram(sentence_translation[-2], \
                                                                              sentence_translation[-1], \
