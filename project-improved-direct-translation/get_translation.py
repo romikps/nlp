@@ -115,8 +115,11 @@ def expand_contracted_determiner(word, source_language="italian", target_languag
 
 def translate(word, pos_tag=None, source_language="italian", target_language="english"):
     '''Return array of translations.'''
-    preprocessed_word = expand_contracted_determiner(word)
-    dictionary = lookup(preprocessed_word, source_language, target_language)
+    if source_language == "italian":
+        dictionary = lookup(expand_contracted_determiner(word), source_language, target_language)
+    else:
+        dictionary = lookup(word, source_language, target_language)
+        
     translations = []
     if pos_tag == None:
         translations = dictionary.values()

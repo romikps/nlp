@@ -5,6 +5,7 @@ from ngram import NGramDictionary
 from get_translation import lookup, translate, get_translated_sentence
 
 
+PATTERN_SUPPORTED_LANGUAGES = ["english", "german", "italian", "spanish", "dutch", "french"]
 bigram = NGramDictionary()
 
 
@@ -119,21 +120,47 @@ def translate_sentence(sentence, source_language, target_language):
         print(word.string, word.type, translation)
         translations.append(translation)
     return get_translated_sentence(translations, bigram)
-            
+
+
+def translate_text_from_unsupported_language(text, source_language, target_language):
+    parsed_text = parse_text(text, language="english")
+    for sentence in parsed_text:
+        translated_words = []
+        for word in sentence.words:
+            word_translation = ""
+            if not (word.string in punctuation or \
+                    word.string in digits):
+                translations = translate(word.string, None, source_language, target_language)
+                if len(translations) == 0:
+                    word_translation = word.string
+                else:
+                    word_translation = translations[0]
+            else:
+                word_translation = word.string
+            print(word, word_translation)
+            translated_words.append(word_translation)
+        print(sentence)
+        translated_sentence = " ".join(translated_words)
+        print(translated_sentence)
+
       
 def new_demo_with_parsetrees():
-    source_language = "italian"
+    source_language = "swedish"
     target_language = "english"
-    text = read_file("text_it.txt")
-    parsed_text = parse_text(text, language="italian")
-    for sentence in parsed_text:
-        print(sentence)
-        translated_sentence = translate_sentence(sentence, source_language, target_language)
-        if target_language == "english":
-            conjugated_sentence = conjugate_3rd_person_present(translated_sentence)
-            print(conjugated_sentence)
-        else:
-            print(translated_sentence)
+    text = read_file("text_se.txt")
+    parsed_text = parse_text(text, language=source_language)
+    if source_language in PATTERN_SUPPORTED_LANGUAGES:
+        for sentence in parsed_text:
+            print(sentence)
+            translated_sentence = translate_sentence(sentence, source_language, target_language)
+            if target_language == "english":
+                conjugated_sentence = conjugate_3rd_person_present(translated_sentence)
+                print(conjugated_sentence)
+            else:
+                print(translated_sentence)
+    else:
+        translate_text_from_unsupported_language(text, source_language, target_language)
+        
            
     
 # Using TREES playground
