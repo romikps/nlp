@@ -3,6 +3,7 @@ import pattern.en
 import pattern.it
 from ngram import NGramDictionary
 from get_translation import lookup, translate, get_translated_sentence
+import argparse
 
 
 PATTERN_SUPPORTED_LANGUAGES = ["english", "german", "italian", "spanish", "dutch", "french"]
@@ -131,13 +132,13 @@ def translate_sentence(sentence, source_language, target_language, ngram_diction
       
 
 def new_demo_with_parsetrees():
-    source_language = "swedish"
+    source_language = "italian"
     target_language = "english"
-    text = read_file("text_se.txt")
+    text = read_file("text_it.txt")
     parsed_text = parse_text(text, language=source_language)
     for sentence in parsed_text:
         print(sentence)
-        translated_sentence = translate_sentence(sentence, source_language, target_language, bigram)
+        translated_sentence = translate_sentence(sentence, source_language, target_language)
         if target_language == "english":
             conjugated_sentence = conjugate_3rd_person_present(translated_sentence)
             print(conjugated_sentence)
@@ -170,3 +171,37 @@ def playground():
         for constituent in sentence.constituents(pnp=True):
             print(constituent)      
     
+
+def main():
+    """
+    Parse command line arguments
+    """
+    parser = argparse.ArgumentParser(description='Direct translation')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--file', '-f', type=str, help='translate the contents of the file')
+    group.add_argument('--string', '-s', type=str, help='translate the string')
+    parser.add_argument('--source_language', '-src', type=str, required=True, help='language to translate from')
+    parser.add_argument('--target_language', '-trg', type=str, required=True, help='language to translate to')
+
+    arguments = parser.parse_args()
+
+    if arguments.file:
+        text = read_file(arguments.file)
+
+    elif arguments.string:
+        text = arguments.string
+    
+    parsed_text = parse_text(text, language=arguments.source_language)
+    for sentence in parsed_text:
+        print(sentence)
+        translated_sentence = translate_sentence(sentence, arguments.source_language, \
+                                                 arguments.target_language)
+        if arguments.target_language == "english":
+            conjugated_sentence = conjugate_3rd_person_present(translated_sentence)
+            print(conjugated_sentence)
+        else:
+            print(translated_sentence)
+
+
+if __name__ == "__main__":
+    main()
